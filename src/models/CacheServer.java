@@ -1,27 +1,38 @@
-package models;
+package src.models;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class CacheServer {
-    private int id, capacity;
-    Set<Integer> storedVideos;
+    private int id;
+    private int capacity;
+    private Set<Integer> videos;
 
-    public CacheServer(int id, int capacity){
+    public CacheServer(int id, int capacity) {
         this.id = id;
         this.capacity = capacity;
-        this.storedVideos = new HashSet<>();
+        this.videos = new HashSet<>();
+    }
+
+    public boolean canStoreVideo(Video video) {
+        return (capacity >= video.getSize());
+    }
+
+    public void storeVideo(Video video) {
+        if (canStoreVideo(video)) {
+            videos.add(video.getId());
+            capacity -= video.getSize();
+        }
     }
 
     public int getId() {
         return id;
     }
 
-    public int getCapacity() {
-        return capacity;
+    public Set<Integer> getVideos() {
+        return videos;
     }
 
-    public Set<Integer> getStoredVideos() {
-        return storedVideos;
+    public String getVideosAsString() {
+        return String.join(" ", videos.stream().map(String::valueOf).toArray(String[]::new));
     }
 }
