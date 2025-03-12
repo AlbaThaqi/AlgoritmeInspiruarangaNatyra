@@ -1,0 +1,51 @@
+# IntelliJ IDEA specific files
+.idea/
+*.iml
+*.iws
+
+# Compiled Java files
+*.class
+*.jar
+*.war
+*.ear
+
+# Logs and database files
+*.log
+*.sqlite
+
+# Build directories
+/bin/
+/build/
+/target/
+out/
+
+# Dependency caches
+.gradle/
+.mvn/
+!**/src/main/resources/**
+!**/src/test/resources/**
+
+# Maven and Gradle wrapper files
+mvnw
+mvnw.cmd
+gradlew
+gradlew.bat
+
+# Temporary files
+*.swp
+*.swo
+*.bak
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Generated files
+*.class
+*.jar
+*.war
+*.ear
+hs_err_pid*
+
+# Lombok cache
+.lombok/
