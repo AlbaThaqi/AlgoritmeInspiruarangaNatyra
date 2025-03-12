@@ -1,37 +1,112 @@
-import models.CacheServer;
-import models.Endpoint;
-import models.Request;
-import models.Video;
+package src;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import src.models.*;
+import java.io.*;
+import java.util.*;
 
 public class Problem {
-    int V, E, R, C, X;
-    List<Video> videos = new ArrayList<>();
-    List<CacheServer> cacheServers = new ArrayList<>();
-    List<Endpoint> endpoints = new ArrayList<>();
-    List<Request> requests = new ArrayList<>();
+    private List<Video> videos;
+    private List<Endpoint> endpoints;
+    private List<Request> requests;
+    private List<CacheServer> cacheServers;
+    private int cacheCapacity;
 
-    public void parseInput(String filename) throws IOException {
-        BufferedReader br = new BufferedReader(new FileReader(filename));
-        String[] firstLine = br.readLine().split(" ");
-        V = Integer.parseInt(firstLine[0]);
-        E = Integer.parseInt(firstLine[1]);
-        R = Integer.parseInt(firstLine[2]);
-        C = Integer.parseInt(firstLine[3]);
-        X = Integer.parseInt(firstLine[4]);
+    public Problem(String inputFile) throws IOException {
+        parseInput(inputFile);
+    }
 
-        String[] videoSizes = br.readLine().split(" ");
+    private void parseInput(String inputFile) throws IOException {
+        BufferedReader br = new BufferedReader(new FileReader(inputFile));
+        StringTokenizer st = new StringTokenizer(br.readLine());
+
+        int V = Integer.parseInt(st.nextToken());
+        int E = Integer.parseInt(st.nextToken());
+        int R = Integer.parseInt(st.nextToken()); 
+        int C = Integer.parseInt(st.nextToken());
+        this.cacheCapacity = Integer.parseInt(st.nextToken()); 
+
+        videos = new ArrayList<>();
+        endpoints = new ArrayList<>();
+        requests = new ArrayList<>();
+        cacheServers = new ArrayList<>();
+
+        st = new StringTokenizer(br.readLine());
         for (int i = 0; i < V; i++) {
-            videos.add(new Video(i, Integer.parseInt(videoSizes[i])));
+            videos.add(new Video(i, Integer.parseInt(st.nextToken())));
+        }
+
+        for (int i = 0; i < E; i++) {
+            st = new StringTokenizer(br.readLine());
+            int dataCenterLatency = Integer.parseInt(st.nextToken());
+            int K = Integer.parseInt(st.nextToken()); // Number of connected caches
+
+            Endpoint endpoint = new Endpoint(i, dataCenterLatency);
+            for (int j = 0; j < K; j++) {
+                st = new StringTokenizer(br.readLine());
+                int cacheId = Integer.parseInt(st.nextToken());
+                int latency = Integer.parseInt(st.nextToken());
+                endpoint.addCacheLatency(cacheId, latency);
+            }
+            endpoints.add(endpoint);
+        }
+
+        for (int i = 0; i < R; i++) {
+            st = new StringTokenizer(br.readLine());
+            int videoId = Integer.parseInt(st.nextToken());
+            int endpointId = Integer.parseInt(st.nextToken());
+            int numRequests = Integer.parseInt(st.nextToken());
+
+            requests.add(new Request(videoId, endpointId, numRequests));
         }
 
         for (int i = 0; i < C; i++) {
-            cacheServers.add(new CacheServer(i, X));
+            cacheServers.add(new CacheServer(i, cacheCapacity));
         }
+
+        br.close();
+    }
+
+    public void solve() {
+
+        requests.sort((a, b) -> Integer.compare(b.getNumRequests(), a.getNumRequests()));
+
+        for (Request request : requests) {
+            Video video = videos.get(request.getVideoId());
+            Endpoint endpoint = endpoints.get(request.getEndpointId());
+
+            int bestCache = -1;
+            int bestLatencySave = 0;
+
+            for (Map.Entry<Integer, Integer> entry : endpoint.getCacheLatencies().entrySet()) {
+                int cacheId = entry.getKey();
+                int latency = entry.getValue();
+
+                CacheServer cache = cacheServers.get(cacheId);
+                int latencySaved = endpoint.getDataCenterLatency() - latency;
+
+                if (latencySaved > bestLatencySave && cache.canStoreVideo(video)) {
+                    bestCache = cacheId;
+                    bestLatencySave = latencySaved;
+                }
+            }
+
+            if (bestCache != -1) {
+                cacheServers.get(bestCache).storeVideo(video);
+            }
+        }
+    }
+
+    public void writeOutput(String outputFile) throws IOException {
+        BufferedWriter bw = new BufferedWriter(new FileWriter(outputFile));
+
+        long usedCaches = cacheServers.stream().filter(c -> !c.getVideos().isEmpty()).count();
+        bw.write(usedCaches + "\n");
+
+        for (CacheServer cache : cacheServers) {
+            if (!cache.getVideos().isEmpty()) {
+                bw.write(cache.getId() + " " + cache.getVideosAsString() + "\n");
+            }
+        }
+        bw.close();
     }
 }
