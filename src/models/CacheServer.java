@@ -3,9 +3,9 @@ package src.models;
 import java.util.*;
 
 public class CacheServer {
-    private int id;
-    private int capacity;
-    private Set<Integer> videos;
+    private final int id;
+    private final int capacity;
+    private final Set<Integer> videos;
 
     public CacheServer(int id, int capacity) {
         this.id = id;
@@ -13,7 +13,7 @@ public class CacheServer {
         this.videos = new HashSet<>();
     }
 
-    public boolean canStoreVideo(Video video) {
+/*    public boolean canStoreVideo(Video video) {
         return (capacity >= video.getSize());
     }
 
@@ -22,10 +22,18 @@ public class CacheServer {
             videos.add(video.getId());
             capacity -= video.getSize();
         }
+    }*/
+
+    public void addVideo(int videoId) {
+        videos.add(videoId);
     }
 
     public int getId() {
         return id;
+    }
+
+    public int getCapacity(){
+        return capacity;
     }
 
     public Set<Integer> getVideos() {

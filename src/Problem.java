@@ -5,11 +5,11 @@ import java.io.*;
 import java.util.*;
 
 public class Problem {
+    private int numVideos, numEndpoints, numRequests, numCacheServers, cacheCapacity;
     private List<Video> videos;
     private List<Endpoint> endpoints;
     private List<Request> requests;
     private List<CacheServer> cacheServers;
-    private int cacheCapacity;
 
     public Problem(String inputFile) throws IOException {
         parseInput(inputFile);
@@ -19,10 +19,10 @@ public class Problem {
         BufferedReader br = new BufferedReader(new FileReader(inputFile));
         StringTokenizer st = new StringTokenizer(br.readLine());
 
-        int V = Integer.parseInt(st.nextToken());
-        int E = Integer.parseInt(st.nextToken());
-        int R = Integer.parseInt(st.nextToken()); 
-        int C = Integer.parseInt(st.nextToken());
+        this.numVideos = Integer.parseInt(st.nextToken());
+        this.numEndpoints = Integer.parseInt(st.nextToken());
+        this.numRequests = Integer.parseInt(st.nextToken());
+        this.numCacheServers = Integer.parseInt(st.nextToken());
         this.cacheCapacity = Integer.parseInt(st.nextToken()); 
 
         videos = new ArrayList<>();
@@ -31,17 +31,21 @@ public class Problem {
         cacheServers = new ArrayList<>();
 
         st = new StringTokenizer(br.readLine());
-        for (int i = 0; i < V; i++) {
+        for (int i = 0; i < this.numVideos; i++) {
             videos.add(new Video(i, Integer.parseInt(st.nextToken())));
         }
 
-        for (int i = 0; i < E; i++) {
+        for (int i = 0; i < this.numCacheServers; i++){
+            cacheServers.add(new CacheServer(i, cacheCapacity));
+        }
+
+        for (int i = 0; i < this.numEndpoints; i++) {
             st = new StringTokenizer(br.readLine());
             int dataCenterLatency = Integer.parseInt(st.nextToken());
-            int K = Integer.parseInt(st.nextToken()); // Number of connected caches
-
+            int numConnectedCaches = Integer.parseInt(st.nextToken()); // Number of connected caches
             Endpoint endpoint = new Endpoint(i, dataCenterLatency);
-            for (int j = 0; j < K; j++) {
+
+            for (int j = 0; j < numConnectedCaches; j++) {
                 st = new StringTokenizer(br.readLine());
                 int cacheId = Integer.parseInt(st.nextToken());
                 int latency = Integer.parseInt(st.nextToken());
@@ -50,7 +54,7 @@ public class Problem {
             endpoints.add(endpoint);
         }
 
-        for (int i = 0; i < R; i++) {
+        for (int i = 0; i < this.numRequests; i++) {
             st = new StringTokenizer(br.readLine());
             int videoId = Integer.parseInt(st.nextToken());
             int endpointId = Integer.parseInt(st.nextToken());
@@ -59,14 +63,25 @@ public class Problem {
             requests.add(new Request(videoId, endpointId, numRequests));
         }
 
-        for (int i = 0; i < C; i++) {
-            cacheServers.add(new CacheServer(i, cacheCapacity));
-        }
-
         br.close();
     }
 
-    public void solve() {
+    public void printParsedData(){
+        System.out.println("Videos:");
+        for (Video v : videos) {
+            System.out.println(v.getId() + " " + v.getSize());
+        }
+
+        System.out.println("\nEndpoints:");
+        for (Endpoint e : endpoints) {
+            System.out.println("Endpoint " + e.getId() + " (DC Latency: " + e.getDataCenterLatency() + ")");
+            for (Map.Entry<Integer, Integer> entry : e.getCacheLatencies().entrySet()) {
+                System.out.println("  Cache " + entry.getKey() + " Latency: " + entry.getValue());
+            }
+        }
+    }
+
+    /*public void solve() {
 
         requests.sort((a, b) -> Integer.compare(b.getNumRequests(), a.getNumRequests()));
 
@@ -94,7 +109,7 @@ public class Problem {
                 cacheServers.get(bestCache).storeVideo(video);
             }
         }
-    }
+    }*/
 
     public void writeOutput(String outputFile) throws IOException {
         BufferedWriter bw = new BufferedWriter(new FileWriter(outputFile));

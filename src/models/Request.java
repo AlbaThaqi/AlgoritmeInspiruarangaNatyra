@@ -1,7 +1,9 @@
-package models;
+package src.models;
 
 public class Request {
-    int videoId, endpointId, numRequests;
+    private final int videoId;
+    private final int endpointId;
+    private final int numRequests;
     public Request(int videoId, int endpointId, int numRequests) {
         this.videoId = videoId;
         this.endpointId = endpointId;

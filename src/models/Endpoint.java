@@ -1,10 +1,11 @@
-package models;
+package src.models;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class Endpoint {
-    int id, dataCenterLatency;
+    private final int id;
+    private final int dataCenterLatency;
     Map<Integer, Integer> cacheLatencies;
     public Endpoint(int id, int dataCenterLatency) {
         this.id = id;
@@ -22,5 +23,9 @@ public class Endpoint {
 
     public Map<Integer, Integer> getCacheLatencies() {
         return cacheLatencies;
+    }
+
+    public void addCacheLatency(int cacheId, int latency){
+        cacheLatencies.put(cacheId, latency);
     }
 }
