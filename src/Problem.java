@@ -124,4 +124,40 @@ public class Problem {
         }
         bw.close();
     }
+
+    public int getNumVideos() {
+        return numVideos;
+    }
+
+    public int getNumEndpoints() {
+        return numEndpoints;
+    }
+
+    public int getNumRequests() {
+        return numRequests;
+    }
+
+    public int getNumCacheServers() {
+        return numCacheServers;
+    }
+
+    public int getCacheCapacity() {
+        return cacheCapacity;
+    }
+
+    public List<Video> getVideos() {
+        return videos;
+    }
+
+    public List<Endpoint> getEndpoints() {
+        return endpoints;
+    }
+
+    public List<Request> getRequests() {
+        return requests;
+    }
+
+    public List<CacheServer> getCacheServers() {
+        return cacheServers;
+    }
 }

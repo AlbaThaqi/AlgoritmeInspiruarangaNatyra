@@ -64,4 +64,29 @@ public class Solver {
             }
         }
     }
+
+
+    public void writeOutput(String filename) throws IOException {
+        BufferedWriter writer = new BufferedWriter(new FileWriter(filename));
+        List<CacheServer> usedCaches = new ArrayList<>();
+        for (CacheServer cache : caches) {
+            if (!cache.getVideos().isEmpty()) {
+                usedCaches.add(cache);
+            }
+        }
+
+        writer.write(String.valueOf(usedCaches.size()));
+        writer.newLine();
+        for (CacheServer cache : usedCaches) {
+            StringBuilder line = new StringBuilder();
+            line.append(cache.getId());
+            for (int videoId : cache.getVideos()) {
+                line.append(" ").append(videoId);
+            }
+            writer.write(line.toString());
+            writer.newLine();
+        }
+
+        writer.close();
+    }
 }
