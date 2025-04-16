@@ -22,13 +22,47 @@ public class Validator {
                 return false;
             }
 
-            System.out.println("✅ Valid output");
+            double fitness = getFitnessScore(problem, cacheToVideos);
+            System.out.printf("✅ Valid output. 📊 Fitness Score: %.2f%%%n", fitness * 100);
             return true;
 
         } catch (IOException e) {
             System.err.println("❌ Error during validation: " + e.getMessage());
             return false;
         }
+    }
+
+    public static double getFitnessScore(Problem problem, Map<Integer, Set<Integer>> cacheToVideos) {
+        long totalSavedTime = 0;
+        long totalPossibleSavedTime = 0;
+
+        for (Request request : problem.getRequests()) {
+            int videoId = request.getVideoId();
+            Endpoint endpoint = problem.getEndpoints().get(request.getEndpointId());
+            int dcLatency = endpoint.getDataCenterLatency();
+            int bestLatency = dcLatency;
+            int idealBestLatency = dcLatency;
+
+            for (Map.Entry<Integer, Integer> entry : endpoint.getCacheLatencies().entrySet()) {
+                int cacheId = entry.getKey();
+                int latency = entry.getValue();
+
+                if (cacheToVideos.containsKey(cacheId) && cacheToVideos.get(cacheId).contains(videoId)) {
+                    bestLatency = Math.min(bestLatency, latency);
+                }
+
+                idealBestLatency = Math.min(idealBestLatency, latency);
+            }
+
+            int saved = dcLatency - bestLatency;
+            int maxSaved = dcLatency - idealBestLatency;
+
+            totalSavedTime += (long) saved * request.getNumRequests();
+            totalPossibleSavedTime += (long) maxSaved * request.getNumRequests();
+        }
+
+        if (totalPossibleSavedTime == 0) return 0.0;
+        return (double) totalSavedTime / totalPossibleSavedTime;
     }
 
     public static boolean validateCacheSizes(List<Video> videos, int maxCapacity, Map<Integer, Set<Integer>> cacheToVideos) {
