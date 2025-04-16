@@ -7,6 +7,15 @@ public class Main {
         try {
             Problem problem = new Problem("data/input.txt");
             problem.printParsedData();
+
+            Solver solver = new Solver(
+                    problem.getVideos(),
+                    problem.getCacheServers(),
+                    problem.getEndpoints(),
+                    problem.getRequests()
+            );
+            solver.solveGreedy();
+            solver.writeOutput("output.txt");
         } catch (IOException e){
             System.err.println("Error: " + e.getMessage());
         }
