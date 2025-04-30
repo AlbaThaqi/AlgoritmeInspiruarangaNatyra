@@ -1,17 +1,11 @@
 package src;
 
-import src.models.CacheServer;
-import src.models.Endpoint;
-import src.models.Request;
-import src.models.Video;
+import src.models.*;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Solver {
     private final List<Video> videos;
@@ -26,7 +20,7 @@ public class Solver {
         this.requests = requests;
     }
 
-    public void solveGreedy() {
+    public Solution solveGreedy() {
         Map<Integer, Integer> remainingSpace = new HashMap<>();
         for (CacheServer cache : caches) {
             remainingSpace.put(cache.getId(), cache.getCapacity());
@@ -48,21 +42,30 @@ public class Solver {
                 scoreMap.put(key, scoreMap.getOrDefault(key, 0L) + timeSaved);
             }
         }
+
         List<Map.Entry<String, Long>> sortedPairs = new ArrayList<>(scoreMap.entrySet());
         sortedPairs.sort((a, b) -> Long.compare(b.getValue(), a.getValue()));
+
+        Solution solution = new Solution();
 
         for (Map.Entry<String, Long> entry : sortedPairs) {
             String[] parts = entry.getKey().split(":");
             int videoId = Integer.parseInt(parts[0]);
             int cacheId = Integer.parseInt(parts[1]);
             Video video = videos.get(videoId);
-            CacheServer cache = caches.get(cacheId);
 
-            if (remainingSpace.get(cacheId) >= video.getSize() && !cache.getVideos().contains(videoId)) {
-                cache.addVideo(videoId);
-                remainingSpace.put(cacheId, remainingSpace.get(cacheId) - video.getSize());
+            if (!solution.getVideosForCache(cacheId).contains(videoId)) {
+                int usedSpace = solution.getVideosForCache(cacheId).stream()
+                        .mapToInt(v -> videos.get(v).getSize()).sum();
+                int spaceLeft = caches.get(cacheId).getCapacity() - usedSpace;
+
+                if (video.getSize() <= spaceLeft) {
+                    solution.addVideoToCache(cacheId, videoId);
+                }
             }
         }
+
+        return solution;
     }
 
 
