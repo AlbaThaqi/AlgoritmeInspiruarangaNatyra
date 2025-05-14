@@ -1,6 +1,7 @@
 package src;
 
 import src.models.GAOperators;
+import src.models.HarmonySearch;
 import src.models.Solution;
 
 import java.io.IOException;
@@ -11,6 +12,7 @@ public class Main {
             String inputPath = "data/input.txt";
             String originalOutputPath = "output_original.txt";
             String mutatedOutputPath = "output_mutated.txt";
+            String harmonyOutputPath = "output_harmony.txt";
 
             Problem problem = new Problem(inputPath);
 
@@ -37,22 +39,28 @@ public class Main {
             System.out.println("🔍 Validating mutated solution...");
             boolean validMutated = Validator.validate(inputPath, mutatedOutputPath);
 
-            if (validOriginal && validMutated) {
+            HarmonySearch hs = new HarmonySearch(problem);
+            Solution harmonySolution = hs.run();
+            harmonySolution.writeToFile(harmonyOutputPath);
+
+            boolean validHs = Validator.validate(inputPath, harmonyOutputPath);
+
+            if (validOriginal && validMutated && validHs) {
                 double fitnessOriginal = Validator.getFitnessScore(problem, initialSolution.getCacheMap());
                 double fitnessMutated = Validator.getFitnessScore(problem, mutatedSolution.getCacheMap());
+                double fitnessHS = Validator.getFitnessScore(problem, harmonySolution.getCacheMap());
 
-                System.out.printf("Original Fitness: %.4f%n", fitnessOriginal);
-                System.out.printf("Mutated  Fitness: %.4f%n", fitnessMutated);
+                System.out.print("Final Fitness Comparison: " +  fitnessOriginal + ", " + fitnessMutated + ", " + fitnessHS);
 
-                if (fitnessMutated > fitnessOriginal) {
-                    System.out.println("Mutation improved the solution!");
-                } else if (fitnessMutated == fitnessOriginal) {
-                    System.out.println("Mutation made no difference.");
+                if (fitnessHS > Math.max(fitnessOriginal, fitnessMutated)) {
+                    System.out.println("Harmony Search produced the best result!");
+                } else if (fitnessMutated > fitnessOriginal) {
+                    System.out.println("Mutation improved the Greedy baseline.");
                 } else {
-                    System.out.println("Mutation reduced performance. Try another!");
+                    System.out.println("Greedy remained the top performer.");
                 }
             } else {
-                System.err.println("One or both solutions are invalid.");
+                System.err.println("One or more solutions are invalid.");
             }
 
         } catch (IOException e) {
