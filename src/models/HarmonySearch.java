@@ -68,7 +68,6 @@ public class HarmonySearch {
             for (Integer vid : entry.getValue()) {
                 if (rand.nextDouble() < HMCR) {
                     if (rand.nextDouble() < PAR) {
-                        // Replace video with another similar size one
                         Video candidate = videos.get(rand.nextInt(videos.size()));
                         if (candidate.getSize() <= cacheCapacity) {
                             newSet.add(candidate.getId());
@@ -84,17 +83,7 @@ public class HarmonySearch {
                 }
             }
 
-            // Filter to respect capacity
-            int used = 0;
-            Set<Integer> filtered = new HashSet<>();
-            for (int vid : newSet) {
-                int size = videos.get(vid).getSize();
-                if (used + size <= cacheCapacity) {
-                    filtered.add(vid);
-                    used += size;
-                }
-            }
-
+            Set<Integer> filtered = enforceCapacity(newSet);
             newCacheMap.put(cacheId, filtered);
         }
 
